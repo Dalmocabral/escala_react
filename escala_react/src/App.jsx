@@ -13,9 +13,9 @@ function App() {
         {/* Se desejar, adicione uma Navbar aqui */}
         
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/schedule" element={<Schedule />} />
+          <Route path="escala_react//" element={<Home />} />
+          <Route path="escala_react//register" element={<Register />} />
+          <Route path="escala_react//schedule" element={<Schedule />} />
         </Routes>
       </div>
     </Router>
