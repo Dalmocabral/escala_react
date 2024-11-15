@@ -17,7 +17,7 @@ const Home = () => {
         color="primary"
         size="large"
         startIcon={<PeopleAltIcon />}
-        onClick={() => navigate('/register')}
+        onClick={() => navigate('escala_react/register')}
         className="home-button"
         style={{ marginBottom: '15px', width: '200px' }}
       >
@@ -29,7 +29,7 @@ const Home = () => {
         color="primary"
         size="large"
         startIcon={<BallotIcon />}
-        onClick={() => navigate('/schedule')}
+        onClick={() => navigate('escala_react/schedule')}
         className="home-button"
         style={{ width: '200px' }}
       >
