@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+
+/* Centraliza o contêiner principal na tela */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    font-family: Roboto;
+    background-image: url('https://i.ibb.co/j4814cL/pexels-pixabay-262353.jpg');
+    background-size: cover; /* Faz a imagem cobrir toda a área disponível */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat; /* Impede a repetição da imagem */
+}
+  /* Estilo para o título h1 */
+  .home-title {
+    margin-bottom: 20px;
+    font-size: 3em;
+    color: #fcf7f7;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Aplica a sombra */
+    
+  }
+  
+  /* Estilo para os botões com espaçamento */
+  .home-button {    
+    padding: 10px;
+    width: 200px; /* Define a largura igual para os botões */
+  }
+
+  /* Estilo para o rodapé */
+.footer {
+    position: absolute; /* Posiciona o rodapé de forma fixa */
+    bottom: 0; /* Coloca o rodapé na parte inferior da página */
+    width: 100%; /* Faz o rodapé ocupar toda a largura da página */
+    
+    color: #fff; /* Cor do texto */
+    text-align: center; /* Alinha o texto no centro */
+    padding: 10px; /* Adiciona um pouco de padding */
+    font-size: 1em; /* Tamanho da fonte */
+  }
