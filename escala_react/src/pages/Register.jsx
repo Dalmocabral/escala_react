@@ -89,7 +89,7 @@ const Register = () => {
       <Button
         variant="contained"
         color="success"
-        onClick={() => navigate('/')}
+        onClick={() => navigate('escala_react/')}
         className="back-home-button"
         sx={{
           position: 'fixed',

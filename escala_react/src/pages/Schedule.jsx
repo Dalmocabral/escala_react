@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Schedule.css'; // Importar o CSS
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -83,13 +84,17 @@ const Schedule = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '20px', fontFamily: 'Roboto' }}>Escala de Colaboradores</h1>
+    <div className="schedule-container">
+      <h1 className="schedule-title">Escala de Operadores</h1>
 
       {/* Tabela de Colaboradores */}
-      <Box sx={{ overflowX: 'auto' }}>
+      <Box className="schedule-table-container">
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: isMobile ? 300 : 650 }} aria-label="tabela colaboradores">
+          <Table
+            className={isMobile ? 'schedule-table-small' : 'schedule-table'}
+            aria-label="tabela colaboradores"
+            size="small" // Reduz o espaçamento interno
+          >
             <TableHead>
               <TableRow>
                 <TableCell>#</TableCell>
@@ -102,7 +107,7 @@ const Schedule = () => {
               {colaboradoresOrdenados.map((colaborador, index) => (
                 <TableRow
                   key={colaborador.id}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  className="schedule-last-row"
                 >
                   <TableCell component="th" scope="row">
                     {index + 1}
@@ -137,13 +142,7 @@ const Schedule = () => {
         color="success"
         endIcon={<WhatsAppIcon />}
         onClick={copiarParaWhatsApp}
-        style={{
-          marginTop: '40px',
-          display: 'flex',
-          justifyContent: 'center',
-          marginLeft: 'auto',  // Isto ajuda a garantir que o botão ocupe todo o espaço e se centralize
-          marginRight: 'auto' // Centraliza o botão
-        }}
+        className="copy-button"
       >
         Copiar para WhatsApp
       </Button>
