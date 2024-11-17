@@ -92,7 +92,7 @@ const Schedule = () => {
         <TableContainer component={Paper}>
           <Table
             className={isMobile ? 'schedule-table-small' : 'schedule-table'}
-            aria-label="tabela colaboradores"
+            aria-label="collapsible table"
             size="small" // Reduz o espaçamento interno
           >
             <TableHead>
