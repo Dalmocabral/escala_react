@@ -13,21 +13,25 @@
 }
 
 .schedule-container {
-  padding: 30px;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.schedule-title {
+  text-align: center;
+  margin-bottom: 1rem;
 }
 
 .schedule-table-container {
-  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.copy-button {
+  display: block;
+  margin: 0 auto;
 }
 
 .schedule-table-small {
-  min-width: 300px;
-}
-
-.schedule-table {
-  min-width: 650px;
-}
-
-.schedule-last-row {
-  border-bottom: none;
+  font-size: 0.85rem;
 }

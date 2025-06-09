@@ -1,99 +1,146 @@
 import React, { useState, useEffect } from 'react';
-import './Schedule.css'; // Importar o CSS
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import { database, ref, onValue, update } from '../config/Firebase';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { useMediaQuery } from '@mui/material';
+import {
+  useMediaQuery,
+  Box,
+  Button,
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { database, ref, onValue, update } from '../config/Firebase';
+import { useNavigate } from 'react-router-dom';
+import './Schedule.css';
 
 const Schedule = () => {
   const [colaboradores, setColaboradores] = useState([]);
+  const [ultimaAcao, setUltimaAcao] = useState(null); // 👈 Novo estado para desfazer
+  const isMobile = useMediaQuery('(max-width:600px)');
+  const navigate = useNavigate();
 
-  const isMobile = useMediaQuery('(max-width:600px)'); // Detectar telas menores que 600px
-
-  // Recuperar colaboradores do Firebase
   useEffect(() => {
     const colaboradoresRef = ref(database, 'colaboradores');
-    onValue(colaboradoresRef, (snapshot) => {
+    const unsubscribe = onValue(colaboradoresRef, (snapshot) => {
       const data = snapshot.val();
-      const listaColaboradores = data
+      const lista = data
         ? Object.entries(data).map(([id, value]) => ({ id, ...value }))
         : [];
-      setColaboradores(listaColaboradores);
+      setColaboradores(lista);
     });
+
+    return () => unsubscribe();
   }, []);
 
-  // Atualizar estado do checkbox no Firebase
   const handleCheckboxChange = (id, isChecked) => {
-    const colaboradorRef = ref(database, `colaboradores/${id}`);
-    update(colaboradorRef, { afastado: isChecked });
+    const colaborador = colaboradores.find(col => col.id === id);
 
-    setColaboradores((prevColaboradores) =>
-      prevColaboradores.map((col) =>
+    setUltimaAcao({
+      tipo: 'afastamento',
+      id,
+      valorAnterior: colaborador.afastado || false,
+    });
+
+    update(ref(database, `colaboradores/${id}`), { afastado: isChecked });
+
+    setColaboradores((prev) =>
+      prev.map((col) =>
         col.id === id ? { ...col, afastado: isChecked } : col
       )
     );
   };
 
-  // Atualizar data de dispensa no Firebase e reordenar
   const handleDispensado = (id) => {
-    const colaboradorRef = ref(database, `colaboradores/${id}`);
-    const novaDataDispensa = new Date().toISOString(); // Data atual no formato ISO
-    update(colaboradorRef, { dataDispensa: novaDataDispensa });
+    const colaborador = colaboradores.find(col => col.id === id);
+    const novaData = new Date().toISOString();
 
-    setColaboradores((prevColaboradores) =>
-      prevColaboradores.map((col) =>
-        col.id === id ? { ...col, dataDispensa: novaDataDispensa } : col
+    setUltimaAcao({
+      tipo: 'dispensa',
+      id,
+      valorAnterior: colaborador.dataDispensa || null,
+    });
+
+    update(ref(database, `colaboradores/${id}`), { dataDispensa: novaData });
+
+    setColaboradores((prev) =>
+      prev.map((col) =>
+        col.id === id ? { ...col, dataDispensa: novaData } : col
       )
     );
   };
 
-  // Ordenar lista de colaboradores: "afastados" no final, ordenados por data de dispensa
+  const desfazerUltimaAcao = () => {
+    if (!ultimaAcao) return;
+
+    const { tipo, id, valorAnterior } = ultimaAcao;
+    const colaboradorRef = ref(database, `colaboradores/${id}`);
+
+    if (tipo === 'afastamento') {
+      update(colaboradorRef, { afastado: valorAnterior });
+      setColaboradores((prev) =>
+        prev.map((col) =>
+          col.id === id ? { ...col, afastado: valorAnterior } : col
+        )
+      );
+    }
+
+    if (tipo === 'dispensa') {
+      update(colaboradorRef, { dataDispensa: valorAnterior });
+      setColaboradores((prev) =>
+        prev.map((col) =>
+          col.id === id ? { ...col, dataDispensa: valorAnterior } : col
+        )
+      );
+    }
+
+    setUltimaAcao(null); // Limpa a ação após desfazer
+  };
+
+  const copiarParaWhatsApp = () => {
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    let texto = `*DISPENSA ATUALIZADA* ${dataAtual}\n\n`;
+
+    colaboradoresOrdenados.forEach(({ nome, afastado }, idx) => {
+      if (!afastado) texto += `*${idx + 1}* - _${nome}_\n`;
+    });
+
+    navigator.clipboard.writeText(texto)
+      .then(() => alert('Texto copiado para a área de transferência'))
+      .catch((err) => console.error('Erro ao copiar texto:', err));
+  };
+
   const colaboradoresOrdenados = [...colaboradores].sort((a, b) => {
     if (a.afastado !== b.afastado) return a.afastado ? 1 : -1;
     if (!a.dataDispensa || !b.dataDispensa) return a.dataDispensa ? -1 : 1;
     return new Date(a.dataDispensa) - new Date(b.dataDispensa);
   });
 
-  // Função para copiar lista para o WhatsApp
-  const copiarParaWhatsApp = () => {
-    const date = new Date();
-    const formattedDate = date.toLocaleDateString('pt-BR');
-    let text = `*DISPENSA ATUALIZADA* ${formattedDate}\n\n`;
-
-    colaboradoresOrdenados.forEach(({ nome, afastado }, index) => {
-      if (!afastado) {
-        text += `*${index + 1}* - _${nome}_\n`;
-      }
-    });
-
-    // Copiar para a área de transferência
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Texto copiado para a área de transferência');
-    }).catch((err) => {
-      console.error('Erro ao copiar texto: ', err);
-    });
-  };
-
   return (
     <div className="schedule-container">
       <h1 className="schedule-title">Escala de Operadores</h1>
 
-      {/* Tabela de Colaboradores */}
+      {/* Botão de Voltar */}
+      <Button
+        variant="outlined"
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate('/escala_react')}
+        sx={{ marginBottom: 2 }}
+      >
+        Voltar à Página Principal
+      </Button>
+
+      {/* Tabela */}
       <Box className="schedule-table-container">
         <TableContainer component={Paper}>
           <Table
             className={isMobile ? 'schedule-table-small' : 'schedule-table'}
-            aria-label="collapsible table"
-            size="small" // Reduz o espaçamento interno
+            size="small"
+            aria-label="Tabela de colaboradores"
           >
             <TableHead>
               <TableRow>
@@ -104,27 +151,24 @@ const Schedule = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {colaboradoresOrdenados.map((colaborador, index) => (
-                <TableRow
-                  key={colaborador.id}
-                  className="schedule-last-row"
-                >
-                  <TableCell component="th" scope="row">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell>{colaborador.nome}</TableCell>
+              {colaboradoresOrdenados.map((col, index) => (
+                <TableRow key={col.id} className="schedule-last-row">
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{col.nome}</TableCell>
                   <TableCell align="right">
                     <Checkbox
-                      checked={colaborador.afastado || false}
-                      onChange={(e) => handleCheckboxChange(colaborador.id, e.target.checked)}
+                      checked={col.afastado || false}
+                      onChange={(e) =>
+                        handleCheckboxChange(col.id, e.target.checked)
+                      }
                     />
                   </TableCell>
                   <TableCell align="right">
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => handleDispensado(colaborador.id)}
                       size="small"
+                      onClick={() => handleDispensado(col.id)}
                     >
                       Dispensar
                     </Button>
@@ -136,16 +180,28 @@ const Schedule = () => {
         </TableContainer>
       </Box>
 
-      {/* Botão para copiar a lista para o WhatsApp */}
-      <Button
-        variant="contained"
-        color="success"
-        endIcon={<WhatsAppIcon />}
-        onClick={copiarParaWhatsApp}
-        className="copy-button"
-      >
-        Copiar para WhatsApp
-      </Button>
+      {/* Botões */}
+      <Box sx={{ marginTop: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          color="success"
+          endIcon={<WhatsAppIcon />}
+          onClick={copiarParaWhatsApp}
+          className="copy-button"
+        >
+          Copiar para WhatsApp
+        </Button>
+
+        {ultimaAcao && (
+          <Button
+            variant="outlined"
+            color="warning"
+            onClick={desfazerUltimaAcao}
+          >
+            Desfazer ação
+          </Button>
+        )}
+      </Box>
     </div>
   );
 };
